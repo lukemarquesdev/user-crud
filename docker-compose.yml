@@ -1,0 +1,41 @@
+services:
+  backend-laravel:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend-laravel
+    environment:
+      - BACKEND_PORT=${BACKEND_PORT}
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    volumes:
+      - ./backend:/backend
+    depends_on:
+      - db
+    networks:
+      - laravel-network
+  db:
+    container_name: db_crud_users
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    restart: always  
+    environment:
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - ./backend/postgres:/var/lib/postgresql/data
+    networks:
+      - laravel-network  
+
+networks:
+  laravel-network:
+    driver: bridge   
+
+volumes:
+  postgres-data:
