@@ -16,15 +16,6 @@ export const useMeStore = defineStore('me', {
         throw error
       }
     },
-    async getAllUsers() {
-      try {
-        const response = await AuthService.getAllUsers
-        this.user = await response.data
-        return this.user
-      } catch (error) {
-        throw error
-      }
-    },
   },
 
   getters: {

@@ -45,7 +45,8 @@ export default class UserService extends BaseService {
           this.request({ auth: true })
             .delete(`/users/${id}`)
             .then((response) => {
-              resolve(response)
+                resolve(response)
+                this.$router.push({ name: "login" });
             })
             .catch((error) => {
               reject(error.response)
@@ -53,5 +54,16 @@ export default class UserService extends BaseService {
         })
       }
 
-    
+      static async logout() {
+        return new Promise((resolve, reject) => {
+          this.request({ auth: true })
+            .post(`/logout`)
+            .then((response) => {
+              resolve(response)
+            })
+            .catch((error) => {
+              reject(error.response)
+            })
+        })
+      }
 }

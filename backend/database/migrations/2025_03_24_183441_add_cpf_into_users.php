@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('access_token')->nullable();
+            $table->string('cpf')->unique()->nullable();
         });
     }
 
@@ -22,8 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            if (Schema::hasColumn('users', 'access_token'))
-                $table->dropColumn('access_token');
+            $table->dropColumn('cpf');
         });
     }
 };

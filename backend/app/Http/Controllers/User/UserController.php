@@ -17,12 +17,9 @@ class UserController extends Controller{
             $params = [];
 
             $users = DB::select($sql, $params);
-    
-            Log::info('Consulta de usuários executada:', ['users' => $users]);
 
             return response()->json($users);
         } catch (\Exception $e) {
-            Log::error('Erro ao consultar usuários:', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Failed to retrieve users'], 500);
         }
     }
@@ -38,7 +35,6 @@ class UserController extends Controller{
 
             return response()->json($user);
         } catch (\Exception $e) {
-            Log::error('Erro ao consultar usuário:', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Failed to retrieve user'], 500);
         }
     }
@@ -47,13 +43,15 @@ class UserController extends Controller{
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
+            'cpf' => 'required|string|size:11|unique:users',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8',
         ]);
 
         try {
-            DB::insert("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", [
+            DB::insert("INSERT INTO users (name, cpf, email, password) VALUES (?, ?, ?, ?)", [
                 $validatedData['name'],
+                $validatedData['cpf'],
                 $validatedData['email'],
                 Hash::make($validatedData['password']),
             ]);
@@ -62,7 +60,6 @@ class UserController extends Controller{
 
             UserRegistered::dispatch($user->name, $user->email);
         } catch (\Exception $e) {
-            Log::error('Erro ao criar usuário:', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Failed to create user'], 500);
         }
         return response()->json($user, 201);
@@ -71,8 +68,9 @@ class UserController extends Controller{
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'name' => 'string|max:255',
-            'email' => 'email',
+            'name' => 'required|string|max:255',
+            'cpf' => 'required|string|size:11|unique:users',
+            'email' => 'required|email',
             'password' => 'string|min:8',
         ]);
 
@@ -140,6 +138,29 @@ class UserController extends Controller{
         } catch (\Exception $e) {
             Log::error('Erro ao consultar usuário:', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Failed to retrieve user'], 500);
+        }
+    }
+
+    public function logout(Request $request){
+        try {
+            $token = $request->bearerToken();
+
+            if (!$token) {
+                throw new Exception('No token provided');
+            }
+
+            $tokenParts = explode('|', $token);
+            if (count($tokenParts) !== 2) {
+                throw new Exception('Invalid token format');
+            }
+
+            $tokenId = $tokenParts[0];
+
+            DB::table('personal_access_tokens')->where('id', $tokenId)->delete();
+
+            return response()->json(['message' => 'Logged out successfully']);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
         }
     }
 

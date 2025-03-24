@@ -1,53 +1,63 @@
 <template>
-  <v-app>
-    <Loading />
-    <!-- Barra de Navegação Superior -->
-    <v-app-bar color="primary" dense>
+  <v-app style="background-color: #F5F5F5">
+    <v-app-bar v-if="isLoggedIn" color="primary" dense>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title>Meu App</v-toolbar-title>
+      <v-toolbar-title>UserCrud</v-toolbar-title>
     </v-app-bar>
 
-    <!-- Sidebar (Navigation Drawer) -->
-    <v-navigation-drawer v-model="drawer" app>
+    <v-navigation-drawer v-if="isLoggedIn" v-model="drawer" app>
       <v-list>
         <v-list-item-group>
-          <v-list-item to="/home">
-            <v-list-item-title>Home</v-list-item-title>
-          </v-list-item>
           <v-list-item to="/list-users">
             <v-list-item-title>Lista de usuários</v-list-item-title>
           </v-list-item>
           <v-list-item to="/about">
             <v-list-item-title>Sobre</v-list-item-title>
           </v-list-item>
-          <v-list-item to="/settings">
-            <v-list-item-title>Configurações</v-list-item-title>
+          <v-list-item @click="logout">
+            <v-list-item-title>Sair</v-list-item-title>
           </v-list-item>
         </v-list-item-group>
       </v-list>
     </v-navigation-drawer>
 
-    <!-- Conteúdo Principal -->
     <v-main>
-      <v-container>
-        <router-view></router-view>
-      </v-container>
+      <v-progress-circular v-if="loading" indeterminate color="primary"></v-progress-circular>
+      <router-view></router-view>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import Loading from './components/Loading.vue';
+import UserService from '@/services/UserService';
 
 export default {
   name: 'App',
 
-  components: {
-    Loading, // 🔹 Agora está registrado corretamente
-  },
+  components: {},
 
   data: () => ({
     drawer: false,
+    isLoggedIn: false,
   }),
+
+  methods: {
+    async logout() {
+      await UserService.logout()
+        .then((response) => {
+          this.isLoggedIn = false;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+  },
+
+  computed: {
+    isLoggedIn() {
+      return !!localStorage.getItem(import.meta.env.VITE_APP_TOKEN_NAME);
+    }
+  },
 }
 </script>
+

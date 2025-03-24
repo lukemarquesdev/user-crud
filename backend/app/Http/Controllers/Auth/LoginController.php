@@ -10,10 +10,8 @@ use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\PersonalAccessToken;
 use Exception;
 
-class LoginController extends Controller
-{
-    public function authenticate(Request $request)
-    {
+class LoginController extends Controller {
+    public function authenticate(Request $request){
         try {
             session()->regenerate();
             $user = DB::table('users')->where('email', $request->email)->first();

@@ -2,8 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Login from '@/views/Login.vue'
 import NotFound from '@/views/NotFound.vue'
 import { useMeStore } from '@/stores/user/me'
-import Home from '@/views/Home.vue'
 import Users from '@/views/Users.vue'
+import About from '@/views/About.vue'
 import { redirectIfAuthenticated, redirectIfNotAuthenticated} from './guards'
 
 
@@ -20,7 +20,6 @@ const router = createRouter({
       },
       {
         path: '/login',
-        // component: BlankLayout,
         beforeEnter: redirectIfAuthenticated,
         children: [
           {
@@ -35,16 +34,15 @@ const router = createRouter({
         ],
       },
       {
-        path: '/home',
-        // component: BlankLayout,
+        path: '/about',
         beforeEnter: redirectIfNotAuthenticated,
         children: [
           {
             path: '',
-            name: 'home',
-            component: Home,
+            name: 'about',
+            component: About,
             meta: {
-              title: 'Home',
+              title: 'Sobre',
               public: true,
             },
           },
@@ -52,7 +50,6 @@ const router = createRouter({
       },
       {
         path: '/list-users',
-        // component: BlankLayout,
         beforeEnter: redirectIfNotAuthenticated,
         children: [
           {
@@ -61,22 +58,6 @@ const router = createRouter({
             component: Users,
             meta: {
               title: 'Listagem de Usuários',
-              public: true,
-            },
-          },
-        ],
-      },
-      {
-        path: '/register',
-        // component: BlankLayout,
-        beforeEnter: redirectIfNotAuthenticated,
-        children: [
-          {
-            path: '',
-            name: 'register',
-            component: Home,
-            meta: {
-              title: 'Cadastro',
               public: true,
             },
           },
