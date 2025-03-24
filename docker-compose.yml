@@ -31,11 +31,24 @@ services:
     volumes:
       - ./backend/postgres:/var/lib/postgresql/data
     networks:
-      - laravel-network  
+      - laravel-network
+
+  queue:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: "php artisan queue:listen"
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - backend-laravel
+    networks:
+      - laravel-network
 
 networks:
   laravel-network:
-    driver: bridge   
+    driver: bridge
 
 volumes:
   postgres-data:
