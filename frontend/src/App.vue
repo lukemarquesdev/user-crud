@@ -1,85 +1,81 @@
-<script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <v-app style="background-color: #F5F5F5">
+    <v-app-bar v-if="isLoggedIn" color="primary" dense>
+      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+      <v-toolbar-title>UserCrud</v-toolbar-title>
+    </v-app-bar>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+    <v-navigation-drawer v-if="isLoggedIn" v-model="drawer" app>
+      <v-list>
+        <v-list-item-group>
+          <v-list-item to="/list-users">
+            <v-list-item-title>Lista de usuários</v-list-item-title>
+          </v-list-item>
+          <v-list-item to="/about">
+            <v-list-item-title>Sobre</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="logout">
+            <v-list-item-title>Sair</v-list-item-title>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list>
+    </v-navigation-drawer>
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+    <v-main>
+      <v-progress-circular v-if="loading" indeterminate color="primary"></v-progress-circular>
+      <router-view></router-view>
+    </v-main>
+  </v-app>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
+<script>
+import UserService from '@/services/UserService';
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
+export default {
+  name: 'App',
 
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
+  data: () => ({
+    drawer: false,
+    isLoggedIn: !!localStorage.getItem(import.meta.env.VITE_APP_TOKEN_NAME),
+    tokenWatcher: null
+  }),
 
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
+  methods: {
+    async logout() {
+      await UserService.logout().finally(() => {
+        localStorage.removeItem(import.meta.env.VITE_APP_TOKEN_NAME);
+        this.isLoggedIn = false;
+        this.$router.push({ name: 'login' }).then(() => {
+          window.location.reload();
+        });
+      });
+    },
+    startTokenWatcher() {
+      this.tokenWatcher = setInterval(() => {
+        const tokenExists = !!localStorage.getItem(import.meta.env.VITE_APP_TOKEN_NAME);
+        if (this.isLoggedIn !== tokenExists) {
+          this.isLoggedIn = tokenExists;
 
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
+          // Se não houver token, redireciona para o login
+          if (!this.isLoggedIn) {
+            this.$router.push({ name: 'login' }).then(() => {
+              window.location.reload();
+            });
+          }
+        }
+      }, 1000); // Verifica a cada 1 segundo
+    }
+  },
 
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
+  mounted() {
+    this.startTokenWatcher();
+  },
 
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
+  beforeUnmount() {
+    if (this.tokenWatcher) {
+      clearInterval(this.tokenWatcher);
+    }
   }
 }
-</style>
+</script>
+
