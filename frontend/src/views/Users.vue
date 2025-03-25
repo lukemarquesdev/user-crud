@@ -1,6 +1,6 @@
 <template>
     <v-container>
-        <v-row md="12" justify="space-between" align="center mt-12">
+        <v-row md="12" justify="space-between" class="mt-12">
             <h1>Lista de usuários</h1>
             <v-btn color="primary" @click="openAddDialog">Adicionar</v-btn>
         </v-row>
@@ -14,7 +14,7 @@
             :loading="loading"
         >
             <template v-slot:item.actions="{ item }">
-                <v-btn icon color="primary" @click="openEditDialog(item)">
+                <v-btn icon color="primary" class="mr-4" @click="openEditDialog(item)">
                     <v-icon>mdi-pencil</v-icon>
                 </v-btn>
                 <v-btn icon color="red" @click="openDeleteDialog(item)">
@@ -159,6 +159,38 @@
             </template>
         </v-snackbar>
 
+        <v-snackbar
+            v-model="snackProcessing"
+            color="primary"
+        >
+            {{ text }}
+            <template v-slot:actions>
+                <v-btn
+                    color="white"
+                    variant="text"
+                    @click="snackProcessing = false"
+                >
+                Fechar
+                </v-btn>
+            </template>
+        </v-snackbar>
+
+        <v-snackbar
+            v-model="snackbarRed"
+            color="red"
+        >
+            {{ text }}
+            <template v-slot:actions>
+                <v-btn
+                    color="white"
+                    variant="text"
+                    @click="snackbarRed = false"
+                >
+                Fechar
+                </v-btn>
+            </template>
+        </v-snackbar>
+
     </v-container>
 </template>
 
@@ -187,6 +219,8 @@ export default {
             loading: true,
             snackbar: false,
             text: '',
+            snackProcessing: false,
+            snackbarRed: false,
         };
     },
     methods: {
@@ -204,43 +238,96 @@ export default {
                 });
         },
         async registerUser() {
+            if (this.regUser.name === '') {
+                this.snackProcessing = false
+                this.text = ''
+                this.showSnackbarRed('Nome precisa ser preenchido')
+                return
+            }
+            if (this.regUser.cpf === '') {
+                this.snackProcessing = false
+                this.text = ''
+                this.showSnackbarRed('CPF precisa ser preenchido')
+                return
+            }
+            if (this.regUser.email === '') {
+                this.snackProcessing = false
+                this.text = ''
+                this.showSnackbarRed('Email precisa ser preenchido')
+                return
+            }
+            if (this.regUser.password === '') {
+                this.snackProcessing = false
+                this.text = ''
+                this.showSnackbarRed('Senha precisa ser preenchido')
+                return
+            }
+            this.showSnackbarProcessing('Usuário sendo cadastrado, Aguarde')
             this.regUser.cpf = removeFormatCPF(this.regUser.cpf)
-            
             await UserService.registerUser(this.regUser)
                 .then((response) => {
+                    this.snackProcessing = false
+                    this.text = ''
                     this.showSnackbar('Usuário cadastrado com sucesso!')
                     this.loading = true;
                     this.getAllUsers();
                     this.closeDialog();
                 })
                 .catch((error) => {
+                    this.snackProcessing = false
+                    this.text = ''
                     console.error(error);
                 });
         },
 
         async editUser() {
+            if (this.editedUser.name === '') {
+                this.showSnackbarRed('Nome precisa ser preenchido')
+                return
+            }
+            if (this.editedUser.cpf === '') {
+                this.showSnackbarRed('CPF precisa ser preenchido')
+                return
+            }
+            if (this.editedUser.email === '') {
+                this.showSnackbarRed('Email precisa ser preenchido')
+                return
+            }
+            if (this.editedUser.password === '') {
+                this.showSnackbarRed('Senha precisa ser preenchido')
+                return
+            }
+            this.showSnackbarProcessing('Usuário sendo editado, Aguarde')
             this.editedUser.cpf = removeFormatCPF(this.editedUser.cpf)
-
             await UserService.editUser(this.id, this.editedUser)
                 .then((response) => {
+                    this.snackProcessing = false
+                    this.text = ''
                     this.showSnackbar('Usuário editado com sucesso!')
                     this.loading = true;
                     this.getAllUsers();
                     this.closeDialog();
                 })
                 .catch((error) => {
+                    this.snackProcessing = false
+                    this.text = ''
                     console.error(error);
                 });
         },
         async deleteUser() {
+            this.showSnackbarProcessing('Usuário sendo apagado, Aguarde')
             await UserService.deleteUser(this.id)
                 .then((response) => {
+                    this.snackProcessing = false
+                    this.text = ''
                     this.showSnackbar('Usuário excluido com sucesso!')
                     this.loading = true;
                     this.getAllUsers();
                     this.closeDialog();
                 })
                 .catch((error) => {
+                    this.snackProcessing = false
+                    this.text = ''
                     console.error(error);
                 });
         },
@@ -278,6 +365,19 @@ export default {
             this.snackbar = true
             setInterval(() => {
                 this.snackbar = false
+                this.text = ''
+            }, 20000)
+        },
+        showSnackbarProcessing(text) {
+            this.text = text;
+            this.snackProcessing = true
+        },
+        showSnackbarRed(text) {
+            this.text = text;
+            this.snackbarRed = true
+            setInterval(() => {
+                this.snackbarRed = false
+                this.text = ''
             }, 20000)
         }
     },

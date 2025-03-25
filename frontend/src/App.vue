@@ -34,30 +34,48 @@ import UserService from '@/services/UserService';
 export default {
   name: 'App',
 
-  components: {},
-
   data: () => ({
     drawer: false,
-    isLoggedIn: false,
+    isLoggedIn: !!localStorage.getItem(import.meta.env.VITE_APP_TOKEN_NAME),
+    tokenWatcher: null
   }),
 
   methods: {
     async logout() {
-      await UserService.logout()
-        .then((response) => {
-          this.isLoggedIn = false;
-        })
-        .catch((error) => {
-          console.error(error);
+      await UserService.logout().finally(() => {
+        localStorage.removeItem(import.meta.env.VITE_APP_TOKEN_NAME);
+        this.isLoggedIn = false;
+        this.$router.push({ name: 'login' }).then(() => {
+          window.location.reload();
         });
+      });
     },
-  },
+    startTokenWatcher() {
+      this.tokenWatcher = setInterval(() => {
+        const tokenExists = !!localStorage.getItem(import.meta.env.VITE_APP_TOKEN_NAME);
+        if (this.isLoggedIn !== tokenExists) {
+          this.isLoggedIn = tokenExists;
 
-  computed: {
-    isLoggedIn() {
-      return !!localStorage.getItem(import.meta.env.VITE_APP_TOKEN_NAME);
+          // Se não houver token, redireciona para o login
+          if (!this.isLoggedIn) {
+            this.$router.push({ name: 'login' }).then(() => {
+              window.location.reload();
+            });
+          }
+        }
+      }, 1000); // Verifica a cada 1 segundo
     }
   },
+
+  mounted() {
+    this.startTokenWatcher();
+  },
+
+  beforeUnmount() {
+    if (this.tokenWatcher) {
+      clearInterval(this.tokenWatcher);
+    }
+  }
 }
 </script>
 

@@ -4,8 +4,8 @@ Este projeto é um sistema de gerenciamento de usuários desenvolvido com Vue.js
 
 ## Tecnologias Usadas
 
-- **Frontend:** Vue.js, Vuetify
-- **Backend:** Laravel
+- **Frontend:** Vue.js 3, Vuetify
+- **Backend:** Laravel 12
 - **Banco de Dados:** PostgreSQL
 
 ## Configuração do Projeto
@@ -20,35 +20,40 @@ Este projeto é um sistema de gerenciamento de usuários desenvolvido com Vue.js
 
 ### Passos para Configuração
 
-#### Backend
-
 1. **Clonar o repositório:**
 
    ```bash
    git clone <URL_DO_REPOSITORIO>
    ```
 
+2. **Ordem**
+    - Primeiro execute o backend e depois o frontend.
 
-2. **Configurar o arquivo `.env`:**
+#### Backend
+
+1. **Configurar o arquivo `.env`:**
 
    - Copie o arquivo `.env.example` para `.env`
-   - Configure as variáveis de ambiente, especialmente as configurações de banco de dados
+   - Configure as variáveis de ambiente, especialmente as configurações de banco de dados  
 
-3. **Levantar os containers:**
-
+2. **Levantar os containers**
+    - Para usar o docker e configurar os containers, você precisa de um arquivo .env
+    - Na raiz do projeto copie o arquivo `.env.example` para `.env`
+    - Configure as variáveis de ambiente, especialmente as configurações de banco de dados 
+    
     - Na raiz do projeto, execute o seguinte comando:
-   
-   ```bash
-   docker compose up --build
-   ```
 
+   ```bash
+   docker compose up -d --build 
+   ```
+   
    - (Opcional) se preferir, não visualizar os logs:
    
    ```bash
    docker compose up -d --build 
-   ```
+   ``` 
 
-4. **Migrar o banco de dados:**
+3. **Migrar o banco de dados:**
 
     - Entre dentro do container do backend Laravel, através desse comando:
 
@@ -61,7 +66,7 @@ Este projeto é um sistema de gerenciamento de usuários desenvolvido com Vue.js
    php artisan migrate
    ```
 
-5. **Seja feliz**
+4. **Seja feliz**
 
     - Se todos os passos foram executados corretamente, você está autorizado a mexer no backend. 
 
@@ -79,7 +84,12 @@ Este projeto é um sistema de gerenciamento de usuários desenvolvido com Vue.js
    npm install
    ```
 
-3. **Iniciar o servidor de desenvolvimento:**
+3. **Configurar o arquivo `.env`:**
+
+   - Copie o arquivo `.env.example` para `.env`
+   - Configure as variáveis de ambiente
+
+4. **Iniciar o servidor de desenvolvimento:**
 
    ```bash
    npm run dev
@@ -105,3 +115,4 @@ Este projeto é um sistema de gerenciamento de usuários desenvolvido com Vue.js
 ## Licença
 
 Eu autorizo você clonar e utilizar tranquilamente :)
+

@@ -14,7 +14,7 @@ export const redirectIfAuthenticated = (to, from, next) => {
   const meStore = useMeStore()
 
   if (meStore.isLoggedIn) {
-    next({ name: 'home' })
+    next({ name: 'list-users' })
   } else {
     next()
   }

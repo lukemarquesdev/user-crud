@@ -14,6 +14,8 @@
                                     type="email"
                                     required
                                     outlined
+                                    :error="snackbarRed"
+                                    :error-messages="snackbarRed ? 'E-mail ou senha incorretos' : ''"
                                 ></v-text-field>
                                 <v-text-field
                                     v-model="password"
@@ -21,6 +23,9 @@
                                     label="Senha"
                                     required
                                     outlined
+                                    :error="snackbarRed"
+                                    :error-messages="snackbarRed ? 'E-mail ou senha incorretos' : ''"
+                                    class="mt-4"
                                 >
                                     <template #append-inner>
                                         <v-icon @click="togglePasswordVisibility">
@@ -45,6 +50,36 @@
                 <img src="@/assets/banner.webp" height="100%" width="100%" alt="Logo" />
             </v-col>
         </v-row>
+        <v-snackbar
+            v-model="snackbar"
+            color="success"
+        >
+            {{ text }}
+            <template v-slot:actions>
+                <v-btn
+                    color="white"
+                    variant="text"
+                    @click="snackbar = false"
+                >
+                Fechar
+                </v-btn>
+            </template>
+        </v-snackbar>
+        <v-snackbar
+            v-model="snackbarRed"
+            color="red"
+        >
+            {{ text }}
+            <template v-slot:actions>
+                <v-btn
+                    color="white"
+                    variant="text"
+                    @click="snackbarRed = false"
+                >
+                Fechar
+                </v-btn>
+            </template>
+        </v-snackbar>
     </v-row>
 </template>
 
@@ -60,22 +95,54 @@ export default {
             email: "",
             password: "",
             showPassword: false,
+            snackbar: false,
+            snackbarRed: false,
+            incorrent: false,
+            text: '',
         };
     },
     methods: {
         async handleLogin() {
             await AuthService.login({email: this.email, password: this.password})
                 .then((response) => {
+                    this.showSnackbar('Bem-vindo! Login realizado com sucesso!')
                     localStorage.setItem(TOKEN_NAME, response.data.token)
                     this.$router.push({ name: "list-users" });
                 })
                 .catch((error) => {
-                    console.error(error);
+                    const message = error.data.error
+                    if (message === 'Email not found') {
+                        this.incorrent = true;
+                        this.showSnackbarRed('E-mail não encontrado');
+                    }
+                    if (message === 'Invalid credentials') {
+                        this.incorrent = true;
+                        this.showSnackbarRed('Senha inválida');
+                    }
                 });
+        },
+        resetError() {
+            this.incorrent = false;
         },
         togglePasswordVisibility() {
             this.showPassword = !this.showPassword;
         },
+        showSnackbar(text) {
+            this.text = text;
+            this.snackbar = true
+            setInterval(() => {
+                this.snackbar = false
+                this.text = ''
+            }, 20000)
+        },
+        showSnackbarRed(text) {
+            this.text = text;
+            this.snackbarRed = true
+            setInterval(() => {
+                this.snackbarRed = false
+                this.text = ''
+            }, 20000)
+        }
     },
 };
 </script>
